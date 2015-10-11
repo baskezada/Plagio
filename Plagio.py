@@ -1,20 +1,20 @@
 
 from numpy import *         #Se importa numpy para poder fabricar la matriz
 
-def deucli(h1,h2):
+def deucli(h1,h2):          #Funcion que retorna la distancia euclidiana entre 2 parrafos
     suma=0
-    for palabra in h1:
-        for palabra2 in h2:
+    for palabra in h1:      
+        for palabra2 in h2:         
             if palabra == palabra2:
                 suma+= (h1[palabra] - h2[palabra2])**2
     sumafinal = (suma)**0.5
     return sumafinal
 
-def dcos(h1,h2):
+def dcos(h1,h2):            #Funcion que retorna la distancia euclidiana entre 2 parrafos
     suma=0
     x = {}
     y = {}
-    for palabra in h1:
+    for palabra in h1:  
         x[palabra] = 0.0
         for palabra2 in h2:
             y[palabra2] = 0.0
@@ -23,7 +23,7 @@ def dcos(h1,h2):
     distancia = 1 - (suma/(deucli(h1,x)*deucli(h2,y)))
     return distancia
 
-def matriztexto():
+def matriztexto():          #Esta funcion cuenta la cantidad de parrafos que hay en archivo y retorna una matriz de parrafos x parrafos
     arch = open("texto.txt")
     count=0
     for linea in arch:
@@ -32,7 +32,7 @@ def matriztexto():
         count+=1
     return [[i]*count for i in range(count)]
 
-def matrizfinal(matriz):
+def matrizfinal(matriz):            #Esta funcion copia la matriz de la funcion matriztexto y la completa con las distancias entre parrafos
     for i in range(len(matriz)):
         for x in range(len(matriz[i])):
             matriz[x][i] = matriz[i][x]
