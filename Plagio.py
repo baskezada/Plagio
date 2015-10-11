@@ -1,5 +1,5 @@
 
-from numpy import *
+from numpy import *         #Se importa numpy para poder fabricar la matriz
 
 def deucli(h1,h2):
     suma=0
