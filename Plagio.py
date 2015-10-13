@@ -10,7 +10,7 @@ def deucli(h1,h2):          #Funcion que retorna la distancia euclidiana entre 2
     sumafinal = (suma)**0.5
     return sumafinal
 
-def dcos(h1,h2):            #Funcion que retorna la distancia euclidiana entre 2 parrafos
+def dcos(h1,h2):            #Funcion que retorna la distancia coseno entre 2 parrafos
     suma=0
     x = {}
     y = {}
@@ -24,7 +24,7 @@ def dcos(h1,h2):            #Funcion que retorna la distancia euclidiana entre 2
     return distancia
 
 def matriztexto():          #Esta funcion cuenta la cantidad de parrafos que hay en archivo y retorna una matriz de parrafos x parrafos
-    arch = open("texto.txt")
+    arch = open(archivo + ".txt")
     count=0
     for linea in arch:
         if "\n" == linea:
@@ -32,33 +32,38 @@ def matriztexto():          #Esta funcion cuenta la cantidad de parrafos que hay
         count+=1
     return [[i]*count for i in range(count)]
 
-def matrizfinal(matriz):            #Esta funcion copia la matriz de la funcion matriztexto y la completa con las distancias entre parrafos
+def matrizfinal(matriz):            #Esta funcion copia la parte triangular superior de una matriz a su parte triangular inferior
     for i in range(len(matriz)):
         for x in range(len(matriz[i])):
             matriz[x][i] = matriz[i][x]
-            
-arch = open("texto.txt")
-lista= []
-lista2= []
-nlinea=1
+
+archivo = raw_input("Ingrese el nombre del archivo (sin extension):  ")
+arch = open(archivo + ".txt")    #Leo el archivo
+lista_eucli= []                                          
+lista_cos= []
+nlinea=0                                        #Variable que maneja el numero de linea que leo del documento que estoy leyendo.
 matrizeu = matriztexto()
 matrizcos = matriztexto()
 diccos={}
 for linea in arch:
-    arch2 = open("texto.txt")
-    nlinea2=1
-    if linea == "\n":
+    arch2 = open(archivo + ".txt")   #Abro el archivo en otra variable para ir comparandolo
+    nlinea2=0                                 #Variable que maneja el numero de linea que leo del documento 2  que estoy leyendo.
+    if linea == "\n":                       
         continue
-    for i,linea2 in enumerate(arch2):
+    if "\n" in linea:
+        nlinea+=1
+    for i,linea2 in enumerate(arch2):        #Funcion que enumera el texto por cada linea (enumeracion, linea)
         if linea2 == "\n":
             continue
-        if i<nlinea:
+        if i+1<=nlinea:                 
             nlinea2+=1
             continue
+        if "\n" in linea2:
+             nlinea2+=1
         h1 = {}
         h2=  {}
-        parrafo1= linea.translate(None, '.,:-!@#$').lower().strip().split()
-        parrafo2= linea2.translate(None, '.,:-!@#$').lower().strip().split()
+        parrafo1= linea.translate(None, '.,:-!@#$').lower().strip().split()               #Quitamos caracteres especiales
+        parrafo2= linea2.translate(None, '.,:-!@#$').lower().strip().split()            #Quitamos caracteres especiales          
         voca= set(parrafo1)| set(parrafo2)
         for palabra in parrafo1:
             if palabra not in h1:
@@ -77,49 +82,36 @@ for linea in arch:
         matrizeu[nlinea-1][nlinea2-1]= round(deucli(h1,h2),2)
         matrizfinal(matrizeu)
         matrizeu= array(matrizeu)
-        matrizcos[nlinea-1][nlinea2-1]= round(dcos(h1,h2),2)
+        matrizcos[nlinea-1][nlinea2-1]= round(abs(dcos(h1,h2)),2)
         matrizfinal(matrizcos)
         matrizcos= array(matrizcos)
+        if nlinea == nlinea2:                                           #Para no agregar las distancias de parrafos iguales a las listas
+            continue
+        lista_eucli.append(round(deucli(h1,h2),2))
+        lista_cos.append(round(dcos(h1,h2),2))
         
-        lista.append(round(deucli(h1,h2),2))
-        lista2.append(round(dcos(h1,h2),2))
-        nlinea2+=1
     arch2.close()
-    nlinea+=1
-                
 arch.close()
-print matrizeu
-print matrizcos
+
+
+#print matrizeu
+#print matrizcos
 
 #Creamos el grafico con la distancia euclidiana.
-veces1 = lista.count(0.0)        #Eliminamos los 0.0 de la lista para encontrar la distancia minima.
-for numero in range(veces1):
-    lista.remove(0.0)
-min1 = min(lista)
-max1 = max(lista)
-plt.hist(lista,len(lista),(min1,max1),color = "m")
+min1 = min(lista_eucli)
+max1 = max(lista_eucli)
+plt.hist(lista_eucli,(max1 - min1)*100,(min1,max1),color = "m")
+plt.ion() 
 plt.title("Distancia euclidiana")
 plt.xlabel("distancias")
 plt.ylabel("frecuencia de distancias")
 plt.savefig("grafico_euclides.png")
-plt.close()
-#Creamos el grafico con la distancia coseno.
-veces2 = lista2.count(0.0)       #Eliminamos los 0.0 de la lista para encontrar la distancia minima.
-for numero in range(veces2):
-    lista2.remove(0.0)
-min2 = min(lista2)
-max2 = max(lista2)
-plt.hist(lista2,len(lista2),(min2,max2), color = "c")
-plt.title("Distancia coseno")
-plt.xlabel("distancias")
-plt.ylabel("frecuencia de distancias")
-plt.savefig("grafico_coseno.png")
-plt.close()
 
 #Pedimos el rango de distancia en el que se encuentra el plagio analizando los graficos.
-print "ingrese el intervalo en el que se encuentra el plagio a partir del grafico de distancia euclidiana"
+print "ingrese el intervalo en el que se encuentra el plagio a partir del grafico de distancia euclidiana \n"
 menor1 = float(raw_input("Limite menor: "))
 mayor1 = float(raw_input("Limite mayor: "))
+print "\n"
 plagio_euc = []                                  #Lista que contendrá los parrafos que presentan posibles plagios.
 for a in range(len(matrizeu)):
     for x in range(len(matrizeu[a])):
@@ -134,11 +126,26 @@ for a in range(len(matrizeu)):
                
 for x in plagio_euc:
     par1, par2 =x
-    print "El parrafo " + str(par1) + " con el parrafo " + str(par2) +" pareciera ser plagio."
+    print "-El parrafo " + str(par1) + " con el parrafo " + str(par2) +" pareciera ser plagio. \n"
+plt.close()
+
+
+#Creamos el grafico con la distancia coseno.
+min2 = min(lista_cos)
+max2 = max(lista_cos)
+plt.ion() 
+plt.hist(lista_cos,(max1 - min1)*100,(min2,max2),color = "c")
+plt.title("Distancia coseno")
+plt.xlabel("distancias")
+plt.ylabel("frecuencia de distancias")
+plt.savefig("grafico_coseno.png")
+
+
     
-print "ingrese el intervalo en el que se encuentra el plagio a partir del grafico de distancia coseno"
+print "ingrese el intervalo en el que se encuentra el plagio a partir del grafico de distancia coseno. \n"
 menor2 = float(raw_input("Limite menor: "))
 mayor2 = float(raw_input("Limite mayor: "))
+print "\n"
 plagio_cos = []                                  #Lista que contendrá los parrafos que presentan posibles plagios.
 for a in range(len(matrizcos)):
     for x in range(len(matrizcos[a])):
@@ -153,12 +160,5 @@ for a in range(len(matrizcos)):
 
 for x in plagio_cos:
     par1, par2 = x
-    print "El parrafo " + str(par1) + " con el parrafo " + str(par2) +" pareciera ser plagio."
-
-
-
-
-
-
-
-    
+    print "-El parrafo " + str(par1) + " con el parrafo " + str(par2) +" pareciera ser plagio. \n"
+plt.close()
